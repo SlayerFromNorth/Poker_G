@@ -20,7 +20,7 @@ navn = [{1: "Feil",    2: "To", 3: "Tre", 4: "Fire", 5: "Fem",
 def find_Gant(kortene):
     """StrightFlush | Fire like | Hus | Flush | Stright | Trelike | To par | Et par | high card"""
 
-    farger =[kortstokk[a,0] for a in kortene]
+    farger =[kortstokk[a, 0] for a in kortene]
     tallerverdier = [kortstokk[a, 1] for a in kortene]
     tallerverdier.sort(reverse=True)
 
@@ -29,19 +29,20 @@ def find_Gant(kortene):
     points = [0, int(high)]
 
     # Flush
-    for ss in [20, 30, 40, 50]:
+    for ss in farge:
         gg = [1 if a == ss else 0 for a in farger]
         if sum(gg) > 4:
             print("flush")
-            riktige = [kortene[index] if a == 1 else 0 for index, a in enumerate(gg)]
-            riktige = [i for i in riktige if i != 0]
+            riktige = [kortene[index] if a == 1 else None for index, a in enumerate(gg)]
+            riktige = [i for i in riktige if i != None]
             tallerverdierflush = [kortstokk[a, 1] for a in riktige]
             tallerverdierflush.sort(reverse=True)
             high = f"{tallerverdierflush[0]:02d}{tallerverdierflush[1]:02d}{tallerverdierflush[2]:02d}{tallerverdierflush[3]:02d}{tallerverdierflush[4]:02d}"
-            points = [6,int(high)]
-            if tallerverdierflush[0]-tallerverdierflush[4] == 4:
-                print("Straitflush")
-                points = [9, 1]
+            points = [6, int(high)]
+            for cc in range(len(tallerverdierflush) - 4):
+                if tallerverdierflush[cc]-tallerverdierflush[cc + 4] == 4:
+                    print("Straitflush")
+                    points = [9, tallerverdierflush[cc]]
             return points
 
     # Straight
@@ -64,6 +65,7 @@ def find_Gant(kortene):
         else:
             teller = 0
             hoy = 0
+
     # Like
 
     par = 0
@@ -96,9 +98,15 @@ def find_Gant(kortene):
         riktige = [i for i in riktige if i != parene[1]]
         high = f"{parene[1]:02d}{parene[1]:02d}{parene[0]:02d}{parene[0]:02d}{riktige[0]:02d}"
         points = [3, int(high)]
+    if par > 2:
+        print("To* par")
+        riktige = [i for i in tallerverdier if i != parene[2]]
+        riktige = [i for i in riktige if i != parene[1]]
+        high = f"{parene[2]:02d}{parene[2]:02d}{parene[1]:02d}{parene[1]:02d}{riktige[0]:02d}"
+        points = [3, int(high)]
     if trelike == 1 and par == 1:
         print("Fult hus")
-        points = [7, trelikeverdi]
+        points = [7, trelikeverdi*10 + par]
 
 
     return points
@@ -141,13 +149,15 @@ def betting(status,teller_tur_inn):
 
     return status
 
+"""
 class poker_ai:
     def __init__(self, kortet):
         self.kortdata = kortet
+        """
 
 stat = [300, 0, 0, 0, 300]
 blind = 5
-for tass in range(10):
+for tass in range(0):
     if stat[0] == 0 or stat[4] == 0:
         print("Spillet er avsluttet!")
         break
@@ -193,4 +203,26 @@ for tass in range(10):
                 stat[4] += stat[2]
                 stat[2] = 0
             break
+
+
+# Tester
+for a in range(10000):
+    kortstokk = np.asarray(kortstokk)
+    en_kortstokk = [a for a in range(51)]
+    kortet = []
+    for a in range(9):
+        kort = random.choice(en_kortstokk)
+        en_kortstokk.remove(kort)
+        kortet.append(kort)
+
+    print(navn[1].get(kortstokk[kortet[0], 0]), navn[1].get(kortstokk[kortet[0], 1]), navn[1].get(kortstokk[kortet[1], 0]), navn[1].get(kortstokk[kortet[1], 1]))
+    print(navn[1].get(kortstokk[kortet[2], 0]), navn[1].get(kortstokk[kortet[2], 1]), navn[1].get(kortstokk[kortet[3], 0]), navn[1].get(kortstokk[kortet[3], 1]),
+          navn[1].get(kortstokk[kortet[4], 0]), navn[1].get(kortstokk[kortet[4], 1]), navn[1].get(kortstokk[kortet[5], 0]), navn[1].get(kortstokk[kortet[5], 1]),
+          navn[1].get(kortstokk[kortet[6], 0]), navn[1].get(kortstokk[kortet[6], 1]))
+    print(navn[1].get(kortstokk[kortet[7], 0]), navn[1].get(kortstokk[kortet[7], 1]), navn[1].get(kortstokk[kortet[8], 0]), navn[1].get(kortstokk[kortet[8], 1]))
+
+    a = find_Gant(kortet[0:7])
+    b = find_Gant(kortet[2:9])
+
+    print(a, b)
 
