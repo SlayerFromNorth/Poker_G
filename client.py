@@ -24,6 +24,7 @@ def find_Gant(kortene):
     tallerverdier = [kortstokk[a, 1] for a in kortene]
     tallerverdier.sort(reverse=True)
 
+
     # High card
     high = f"{tallerverdier[0]:02d}{tallerverdier[1]:02d}{tallerverdier[2]:02d}{tallerverdier[3]:02d}{tallerverdier[4]:02d}"
     points = [0, int(high)]
@@ -39,6 +40,8 @@ def find_Gant(kortene):
             tallerverdierflush.sort(reverse=True)
             high = f"{tallerverdierflush[0]:02d}{tallerverdierflush[1]:02d}{tallerverdierflush[2]:02d}{tallerverdierflush[3]:02d}{tallerverdierflush[4]:02d}"
             points = [6, int(high)]
+            if tallerverdierflush[0]== 14:
+                tallerverdierflush.append(1)
             for cc in range(len(tallerverdierflush) - 4):
                 if tallerverdierflush[cc]-tallerverdierflush[cc + 4] == 4:
                     print("Straitflush")
@@ -49,9 +52,9 @@ def find_Gant(kortene):
 
     teller = 0
     hoy = 0
-    if tallerverdier[0] == 14 and tallerverdier[6] == 2:
-        teller = 1
-    for a in range(6):
+    if tallerverdier[0] == 14:
+        tallerverdier.append(1)
+    for a in range(len(tallerverdier)-1):
         if hoy == 0:
             hoy = tallerverdier[a]
         if tallerverdier[a] - 1 == tallerverdier[a+1]:
@@ -179,7 +182,6 @@ for tass in range(0):
         kort = random.choice(en_kortstokk)
         en_kortstokk.remove(kort)
         kortet.append(kort)
-        # print(navn.get(kortstokk[kort, 0]), navn.get(kortstokk[kort, 1]))
     for gg in [2, 5, 6, 7]:
         for ss in range(gg):
             print(navn[1].get(kortstokk[kortet[ss], 0]), navn[1].get(kortstokk[kortet[ss], 1]))
@@ -206,7 +208,8 @@ for tass in range(0):
 
 
 # Tester
-for a in range(10000):
+
+for a in range(1):
     kortstokk = np.asarray(kortstokk)
     en_kortstokk = [a for a in range(51)]
     kortet = []
@@ -225,4 +228,8 @@ for a in range(10000):
     b = find_Gant(kortet[2:9])
 
     print(a, b)
+    print(kortet)
 
+kortet1= [0,2,3,12,14,23,34]
+gg = find_Gant(kortet1[0:7])
+print(gg)
