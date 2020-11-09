@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import ai_poker_v01 as aa
 
 kortstokk =[[20,2],[20,3],[20,4],[20,5],[20,6],[20,7],[20,8],[20,9],[20,10],[20,11],[20,12],[20,13],[20,14],
            [30,2],[30,3],[30,4],[30,5],[30,6],[30,7],[30,8],[30,9],[30,10],[30,11],[30,12],[30,13],[30,14],
@@ -114,65 +115,96 @@ def find_Gant(kortene):
 
     return points
 
-def betting(status,teller_tur_inn):
+def betting(status, spillere, runde_inn, kortene):
     """
-    [0] spiller 1 totalbeløp tilgjengelig,   [1]spiller 1 betting denne runden,
-    [2]     pot
-    [3] spiller 2 betting denne runden,     [4] spiller 2 totalbeløp tilgjengelig
+    [0] spiller 1 totalbeløp tilgjengelig,   [1] spiller 2 totalbeløp tilgjengelig,
+    [2] spiller 1 totalbeløp tilgjengelig,   [3] spiller 2 betting denne runden
+    [4] spiller 1 pot bidrag             ,   [5] spiller 2 pot bidrag
+
 
     bet > 0, check = 0, fold = -1
     """
-    teller_tur = teller_tur_inn
+    runde = runde_inn
     pågår = True
+    if status[0] == 0 or status[1] == 0:
+        return status
     while pågår:
         print(status)
-        if teller_tur % 2 == 0:
-            userInput = int(input('Ditt bet?'))
+        spiller_better = (runde + 1) % spillere
+        if spiller_better == 0:
+            spillerInput = int(input('Ditt bet?'))
         else:
-            userInput = random.choice([0, status[1]])    # ---------------HER ER AI SPILLER---------------check/call
-        if userInput == -1:
-            status[((teller_tur + 1) % 2) * 4] += status[1] + status[2] + status[3]
-            status[1], status[2], status[3] = 0, 0, 0
-            print("fold")
+            spillerInput = aa.ai_starter(kortet,stat)
+
+        if spillerInput == -1:
+            status[(runde) % spillere] += (status[spiller_better+spillere]+status[spiller_better+spillere*2]) # motspiller får penger, ikke multiplayer
+            status[spiller_better+spillere], status[spiller_better+spillere*2] = 0, 0
             pågår = False
-        if userInput + status[1+(teller_tur % 2)*2] < status[1+((teller_tur+1) % 2)*2]:
+            print("fold")
+
+        if spillerInput >= status[spiller_better]: # all in
+            status[spiller_better + spillere] += status[spiller_better]
+            if status[((runde) % spillere)+spillere] > status[spiller_better + spillere]: # mer bet enn motspiller hadde
+                status[spiller_better] += status[((runde) % spillere)+spillere] - status[spiller_better + spillere]
+                status[((runde) % spillere) + spillere] = status[spiller_better + spillere]
+                pågår = False
+            status[spiller_better] = 0
+            print("allin")
+            print(status)
+
+        if spillerInput + status[spiller_better+spillere] < status[((runde) % spillere)+spillere]:
             print("for lite bet!")
             continue
-        if userInput > status[0] + status[1] or userInput > status[4] + status[3]:
-            userInput = min(max(0, status[0] + status[1]), max(0, status[4] + status[3]))-status[1+(teller_tur % 2)*2]
-        status[(teller_tur % 2) * 4] -= userInput
-        status[1+((teller_tur % 2)*2)] += userInput
-        teller_tur += 1
 
-        if teller_tur > (1 + teller_tur_inn) and status[1] == status[3]:
+        if not status[spiller_better] == 0 and pågår:
+            status[spiller_better] -= spillerInput
+            status[spiller_better + spillere] += spillerInput
+        runde += 1
+        if runde > (1 + runde_inn) and status[0] == 0 and status[1] == 0:
             pågår = False
-            status[2] += status[1]*2
-            status[1], status[3] = 0, 0
+            status[4] += status[2]
+            status[5] += status[3]
+
+            status[2], status[3] = 0, 0
+        if runde > (1 + runde_inn) and status[2] == status[3]:
+            pågår = False
+            status[4] += status[2]
+            status[5] += status[3]
+
+            status[2], status[3] = 0, 0
 
 
     return status
 
-"""
-class poker_ai:
-    def __init__(self, kortet):
-        self.kortdata = kortet
-        """
+spillere = 2
+start_chips = 300
+small_blind = 5
 
-stat = [300, 0, 0, 0, 300]
-blind = 5
-for tass in range(0):
-    if stat[0] == 0 or stat[4] == 0:
+stat = [start_chips for a in range(spillere)]
+[stat.append(0) for a in range(spillere*2)]
+
+print(stat)
+for runde in range(10):
+    if stat[0] == 0 or stat[1] == 0:
         print("Spillet er avsluttet!")
         break
-    if tass % 2 == 0:
-        teller_tur = 0
-        spiller_EN = blind
-        spiller_TO = blind * 2
-    else:
-        teller_tur = 1
-        spiller_EN = blind * 2
-        spiller_TO = blind
-    stat[0], stat[1], stat[3], stat[4] = stat[0]-spiller_EN, spiller_EN, spiller_TO, stat[4]-spiller_TO
+    dealer = runde % spillere
+    print(stat)
+    for runde in range(1):
+        dealer = runde % spillere
+        if stat[(runde + 1) % spillere] > small_blind:
+            stat[(runde + 1) % spillere] -= small_blind
+            stat[(runde + 1) % spillere + spillere] += small_blind
+        else:
+            stat[(runde + 1) % spillere] -= stat[(runde + 1) % spillere]
+            stat[(runde + 1) % spillere + spillere] += stat[(runde + 1) % spillere]
+        if stat[(runde + 2) % spillere] > small_blind:
+            stat[(runde + 2) % spillere] -= (small_blind * 2)
+            stat[(runde + 2) % spillere + spillere] += (small_blind * 2)
+        else:
+            stat[(runde + 2) % spillere] -= stat[(runde + 2) % spillere]
+            stat[(runde + 2) % spillere + spillere] += stat[(runde + 2) % spillere]
+
     kortstokk = np.asarray(kortstokk)
     en_kortstokk = [a for a in range(51)]
     kortet = []
@@ -185,31 +217,31 @@ for tass in range(0):
     for gg in [2, 5, 6, 7]:
         for ss in range(gg):
             print(navn[1].get(kortstokk[kortet[ss], 0]), navn[1].get(kortstokk[kortet[ss], 1]))
-        stat = betting(stat, teller_tur)
-        if stat[2] == 0 or gg == 7:
+        stat = betting(stat, spillere, runde, kortet)
+        if stat[4] == 0 or gg == 7:
 
             a = find_Gant(kortet[0:7])
             b = find_Gant(kortet[2:9])
             print(a, b)
             if a > b:
-                print("Du vant:", stat[2])
-                stat[0] += stat[2]
-                stat[2] = 0
+                stat[0] += (stat[4]+stat[5])
+                stat[4], stat[5] = 0, 0
+                print("Du vant:", stat[0])
             elif a == b:
+                stat[0], stat[1] = stat[4]+stat[0], stat[5]+stat[1]
+                stat[4], stat[5] = 0, 0
                 print("Begge vant:", stat[2])
-                stat[0] += int(stat[2]/2)
-                stat[4] += int(stat[2] / 2)
-                stat[2] = 0
             else:
-                print("AI vant:", stat[2])
-                stat[4] += stat[2]
-                stat[2] = 0
+                stat[1] += (stat[4] + stat[5])
+                stat[4], stat[5] = 0, 0
+                print("AI vant:", stat[1])
+
             break
 
 
 # Tester
 
-for a in range(1):
+for a in range(0):
     kortstokk = np.asarray(kortstokk)
     en_kortstokk = [a for a in range(51)]
     kortet = []
@@ -224,12 +256,8 @@ for a in range(1):
           navn[1].get(kortstokk[kortet[6], 0]), navn[1].get(kortstokk[kortet[6], 1]))
     print(navn[1].get(kortstokk[kortet[7], 0]), navn[1].get(kortstokk[kortet[7], 1]), navn[1].get(kortstokk[kortet[8], 0]), navn[1].get(kortstokk[kortet[8], 1]))
 
-    a = find_Gant(kortet[0:7])
+    a = find_Gant(kortet[0:5])
     b = find_Gant(kortet[2:9])
 
     print(a, b)
     print(kortet)
-
-kortet1= [0,2,3,12,14,23,34]
-gg = find_Gant(kortet1[0:7])
-print(gg)
