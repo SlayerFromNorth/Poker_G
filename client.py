@@ -29,7 +29,7 @@ def betting(status, spillere, runde_inn, kortene):
         if spiller_better == 0:
             spillerInput = int(input('Ditt bet?'))
         else:
-            spillerInput = aa.ai_starter(kortet, stat)
+            spillerInput = aa.ai_starter(kort_tilgjengelig, stat)
 
         if spillerInput == -1:
             status[(runde) % spillere] += (status[spiller_better+spillere]+status[spiller_better+spillere*2]) # motspiller får penger, ikke multiplayer
@@ -80,6 +80,7 @@ stat = [start_chips for a in range(spillere)]
 
 for runde in range(10):
 
+
     if stat[0] == 0 or stat[1] == 0:
         print("Spillet er avsluttet!")
         break
@@ -99,31 +100,34 @@ for runde in range(10):
     kortet = []
     print(stat)
     for a in range(9):
+
         kort = random.choice(en_kortstokk)
         en_kortstokk.remove(kort)
         kortet.append(kort)
-        for gg in [2, 5, 6, 7]:
-            try:
-                for ss in range(gg):
-                    print(navn[1].get(kortstokk[kortet[ss], 0]), navn[1].get(kortstokk[kortet[ss], 1]))
-                stat = betting(stat, spillere, runde, kortet)
-                if stat[0] == 0 or stat[1] == 0 or gg == 7:
+    for gg in [2, 5, 6, 7]:
+        kort_tilgjengelig = []
+        for ss in range(gg):
+            print(navn[1].get(kortstokk[kortet[ss], 0]), navn[1].get(kortstokk[kortet[ss], 1]))
+            kort_tilgjengelig.append(kortet[ss])
+        stat = betting(stat, spillere, runde, kortet)
+        if stat[0] == 0 or stat[1] == 0 or gg == 7:
 
-                    a = engine_poker.find_Gant(kortet[0:7])
-                    b = engine_poker.find_Gant(kortet[2:9])
-                    print(a, b)
-                    if a > b:
-                        stat[0] += (stat[4]+stat[5])
-                        print("Du vant:", stat[4] + stat[5])
-                        stat[4], stat[5] = 0, 0
-                    elif a == b:
-                        stat[0], stat[1] = stat[4]+stat[0], stat[5]+stat[1]
-                        print("Begge vant:", stat[2])
-                        stat[4], stat[5] = 0, 0
-                    else:
-                        stat[1] += (stat[4] + stat[5])
-                        print("AI vant:", stat[4] + stat[5])
-                        stat[4], stat[5] = 0, 0
-                    break
-            except:
-                pass
+            a = engine_poker.find_Gant(kortet[0:7])
+            b = engine_poker.find_Gant(kortet[2:9])
+            print(a, b)
+            if a > b:
+                stat[0] += (stat[4]+stat[5])
+                print("Du vant:", stat[4] + stat[5])
+                stat[4], stat[5] = 0, 0
+            elif a == b:
+                stat[0], stat[1] = stat[4]+stat[0], stat[5]+stat[1]
+                print("Begge vant:", stat[2])
+                stat[4], stat[5] = 0, 0
+            else:
+                stat[1] += (stat[4] + stat[5])
+                print("AI vant:", stat[4] + stat[5])
+                stat[4], stat[5] = 0, 0
+            break
+
+
+# Tester
