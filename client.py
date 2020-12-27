@@ -96,7 +96,7 @@ for runde in range(10):
 
     kortstokk = engine_poker.kortstokk
     navn = engine_poker.navn
-    en_kortstokk = [a for a in range(51)]
+    en_kortstokk = [a for a in range(52)]
     kortet = []
     print(stat)
     for a in range(9):
