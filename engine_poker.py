@@ -16,7 +16,11 @@ navn = [{1: "Feil",    2: "To", 3: "Tre", 4: "Fire", 5: "Fem",
         11: "11",    12: "12", 13: "13", 14: "14",
         20: "S", 30: "H", 40: "R", 50: "K"}]
 
-
+def poker_names(kortene,mod=1):
+    names = []
+    for navn_kort in kortene:
+        names.append([navn[mod].get(kortstokk[navn_kort, 0]), navn[mod].get(kortstokk[navn_kort, 1])])
+    return names
 
 def find_Gant(kortene):
     """StrightFlush | Fire like | Hus | Flush | Stright | Trelike | To par | Et par | high card"""
@@ -28,7 +32,7 @@ def find_Gant(kortene):
 
     # High card
     high = f"{tallerverdier[0]:02d}{tallerverdier[1]:02d}{tallerverdier[2]:02d}{tallerverdier[3]:02d}{tallerverdier[4]:02d}"
-    points = [0, int(high)]
+    points = [1, int(high)]
 
     # Flush
     for ss in farge:
@@ -41,7 +45,7 @@ def find_Gant(kortene):
             tallerverdierflush.sort(reverse=True)
             high = f"{tallerverdierflush[0]:02d}{tallerverdierflush[1]:02d}{tallerverdierflush[2]:02d}{tallerverdierflush[3]:02d}{tallerverdierflush[4]:02d}"
             points = [6, int(high)]
-            if tallerverdierflush[0]== 14:
+            if tallerverdierflush[0] == 14:
                 tallerverdierflush.append(1)
             for cc in range(len(tallerverdierflush) - 4):
                 if tallerverdierflush[cc]-tallerverdierflush[cc + 4] == 4:
@@ -73,18 +77,20 @@ def find_Gant(kortene):
     # Like
 
     par = 0
-    parene =[]
-    trelikeverdi=0
+    parene = []
+    trelikeverdi = 0
     trelike = 0
     for ss in [a+2 for a in range(13)]:
 
         gg = [1 if a == ss else 0 for a in tallerverdier]
         if sum(gg) > 3:
 
-            points = [8, ss]
+            riktige = [i for i in tallerverdier if i != ss]
+            high = f"{ss:02d}{ss:02d}{ss:02d}{ss:02d}{riktige[0]:02d}"
+            points = [8, int(high)]
         elif sum(gg) > 2:
 
-            trelike +=1
+            trelike += 1
             trelikeverdi = ss
             riktige = [i for i in tallerverdier if i != ss]
             high = f"{ss:02d}{ss:02d}{ss:02d}{riktige[0]:02d}{riktige[1]:02d}"
@@ -92,7 +98,7 @@ def find_Gant(kortene):
         elif sum(gg) > 1:
 
             parene.append(ss)
-            par +=1
+            par += 1
             riktige = [i for i in tallerverdier if i != ss]
             high = f"{ss:02d}{ss:02d}{riktige[0]:02d}{riktige[1]:02d}{riktige[2]:02d}"
             points = [2, int(high)]
@@ -109,8 +115,8 @@ def find_Gant(kortene):
         high = f"{parene[2]:02d}{parene[2]:02d}{parene[1]:02d}{parene[1]:02d}{riktige[0]:02d}"
         points = [3, int(high)]
     if trelike == 1 and par == 1:
-
-        points = [7, trelikeverdi*10 + par]
+        high = f"{trelikeverdi:02d}{parene[0]:02d}"
+        points = [7, int(high)]
 
 
     return points
