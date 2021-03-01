@@ -1,4 +1,3 @@
-import numpy as np
 import random
 from Poker import ai_poker_v01 as aa
 from Poker import engine_poker
@@ -128,6 +127,5 @@ for runde in range(10):
                 print("AI vant:", stat[4] + stat[5])
                 stat[4], stat[5] = 0, 0
             break
-
 
 # Tester
