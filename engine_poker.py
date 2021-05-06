@@ -22,7 +22,7 @@ def poker_names(kortene,mod=1):
     return names
 
 def find_Gant(kortene):
-    """StrightFlush | Fire like | Hus | Flush | Stright | Trelike | To par | Et par | high card"""
+    """ Stright Flush | Fire like | Hus | Flush | Stright | Tre like | To par | Et par | high card"""
 
     farger =[kortstokk[a, 0] for a in kortene]
     tallerverdier = [kortstokk[a, 1] for a in kortene]
@@ -119,3 +119,46 @@ def find_Gant(kortene):
 
 
     return points
+
+import random
+import time
+from tqdm import tqdm
+
+
+def chance_ran (my_hand, your_hand, epoker=25):
+    ai_counter, Even_counter = 0, 0
+    start_time = time.time()
+    for _ in range(epoker):
+        kortene = [my_hand[0], my_hand[1]]
+        if len(your_hand) > 1:
+            kortene += [your_hand[0], your_hand[1]]
+        en_kortstokk = [a for a in range(52)]
+        [en_kortstokk.remove(b) for b in kortene]
+        for a in range(9 - len(kortene)):
+            kort = random.choice(en_kortstokk)
+            en_kortstokk.remove(kort)
+            kortene.append(kort)
+
+        ai_hand_end =kortene[:2] + kortene[4:]
+        Even_hand_end = kortene[2:4] + kortene[4:]
+        ai_styrke = find_Gant(ai_hand_end)
+        Even_styrke = find_Gant(Even_hand_end)
+        if ai_styrke >= Even_styrke:
+            ai_counter += 1
+        else:
+            Even_counter += 1
+
+    return ai_counter/epoker
+
+"""rankings=[]
+for first_card in tqdm(range(52)):
+    for secund_card in range(52):
+        if secund_card == first_card:
+            continue
+        name =poker_names([first_card,secund_card])
+        aaa = chance_ran([first_card,secund_card], [99], epoker=100)
+        rankings.append([aaa, name])
+
+rankings_sorted = sorted(rankings, key=lambda card_strong: card_strong[0], reverse=True)
+
+print(rankings_sorted[:10])"""
